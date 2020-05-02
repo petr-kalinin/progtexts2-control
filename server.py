@@ -1,25 +1,34 @@
 #!/usr/bin/python3
-from bottle import route, run, static_file, post
+from bottle import route, run, static_file, post, redirect
 import os
 import shutil
 import sys
 import subprocess
 
-BASE_DIR = os.path.basename(os.path.basename(os.path.abspath(sys.argv[0])))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(sys.argv[0])))
 BUILD_ROOT = os.path.join(BASE_DIR, "docs", "_build")
 DEBUG = os.environ.get("DEBUG")
 
 
+def run_command(command):
+    print(">> ", *command)
+    subprocess.check_call(command)
+
+
 def ensure_up_to_date():
     os.chdir(os.path.join(BASE_DIR, "theme"))
-    subprocess.check_call(["git", "pull"])
-    subprocess.check_call(["npm", "run", "build"])
+    run_command(["git", "pull"])
+    run_command(["npm", "run", "build"])
     os.chdir(os.path.join(BASE_DIR, "docs"))
-    subprocess.check_call(["git", "pull"])
-    subprocess.check_call(["make", "html"])
-    subprocess.check_call(["make", "epub"])
+    run_command(["git", "pull"])
+    run_command(["make", "html"])
+    run_command(["make", "epub"])
     shutil.copy(os.path.join(BUILD_ROOT, "epub", "sphinx.epub"), os.path.join(BUILD_ROOT, "html", "notes.epub"))
 
+
+@route('/')
+def index():
+    redirect("/index.html")
 
 @route('/<filename:path>')
 def send_static(filename):
