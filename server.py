@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python3 -u
 from bottle import route, run, static_file, post, redirect, request
 import hmac
 import os
@@ -22,10 +22,11 @@ def run_command(command):
 def ensure_up_to_date():
     os.chdir(os.path.join(BASE_DIR, "theme"))
     run_command(["git", "pull"])
+    run_command(["npm", "install"])
     run_command(["npm", "run", "build"])
     os.chdir(os.path.join(BASE_DIR, "docs"))
     run_command(["git", "pull"])
-    shutil.rmtree(BUILD_ROOT)
+    shutil.rmtree(BUILD_ROOT, ignore_errors=True)
     run_command(["make", "html"])
     run_command(["make", "html"])
     run_command(["make", "epub"])
@@ -46,7 +47,7 @@ def update():
     if SECRET:
         signature = request.headers.get('X-Hub-Signature')
         sha, signature = signature.split('=')
-        hashhex = hmac.new(SECRET, request.data, digestmod='sha1').hexdigest()
+        hashhex = hmac.new(SECRET.encode(), request.body.read(), digestmod='sha1').hexdigest()
         if not hmac.compare_digest(hashhex, signature):
             return "403"
     ensure_up_to_date()
@@ -57,7 +58,7 @@ def serve():
     if DEBUG:
         run(host='localhost', port=8080, debug=True)
     else:
-        run(host="0.0.0.0", port=80)
+        run(host="0.0.0.0", port=80, server='waitress')
 
 
 def main():
