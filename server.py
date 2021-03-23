@@ -57,7 +57,7 @@ def serve():
     if DEBUG:
         run(host='localhost', port=8080, debug=True)
     else:
-        run(host="0.0.0.0", port=80, server='waitress')
+        run(host="0.0.0.0", port=8080, server='waitress')
 
 
 def main():
