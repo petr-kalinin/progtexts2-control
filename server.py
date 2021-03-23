@@ -28,6 +28,7 @@ def ensure_up_to_date():
     run_command(["git", "pull"])
     shutil.rmtree(BUILD_ROOT, ignore_errors=True)
     run_command(["make", "html"])
+    run_command(["make", "html"])
     run_command(["make", "epub"])
     shutil.copy(os.path.join(BUILD_ROOT, "epub", "sphinx.epub"), os.path.join(BUILD_ROOT, "html", "notes.epub"))
 
